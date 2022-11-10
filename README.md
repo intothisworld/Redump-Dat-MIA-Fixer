@@ -1,4 +1,4 @@
-# Redump-Dat-MIA-Fixer
+# Redump Dat MIA-Fixer
 This program adds "MIA" tags to any MIA discs in an inputted Redump DAT file.
 
 You can either simply open the program and manually input a specific .dat file, or a folder containing any number of .dats, or you can drag & drop any combination of files and folders and the program will recursively search through all of them to identify and check any .dats within.
