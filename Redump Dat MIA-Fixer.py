@@ -1,6 +1,6 @@
 ## Import modules and get basic program config set up.
 
-# Get logging set up.
+# Set up logging.
 import os
 current_working_directory = os.getcwd()
 new_folder = "logs"
@@ -61,10 +61,11 @@ logging.debug(f"--Number of files/folders to check: {len(user_input)}")
 
 inputted_dats_list = list()
 
-# os.walk method takes a directory path as input and each iteration
-# returns a tuple composed of the current smaller path within being
-# "walked," a list of directories within that path and a list of files
-# within as well.
+# os.walk method takes a directory path as input, and then recursively
+# iterates through each directory within, returning a 3-item tuple for
+# each one. Tuple is composed of the directory path being "walked," a
+# list of the smaller directories within that path and a list of the
+# files within as well.
 logging.info("\n**Checking...")
 for inp_path in user_input:
     if os.path.isdir(inp_path):
@@ -199,6 +200,19 @@ logging.debug(f"---Total dictionary items: {len(mialist_Dict)}\n")
 ## statements, and different lists and dictionaries than I had expected.
 ## May come back later and rework using class instances and True/False
 ## flags instead.)
+
+logging.info("\n'MIA' attributes will now be added for each game listed in the MIA lists. Would you like to also append an '[MIA]' label to the beginning of each game's archive/directory name? (will result in your rom manager going through and making actual changes to your folders/archives...)")
+while True:
+    mia_label_prompt = input("    y/n: ")
+    if mia_label_prompt == "y":
+        add_mia_label = True
+        break
+    elif mia_label_prompt == "n":
+        add_mia_label = False
+        break
+    else:
+        print("Please only enter 'y' for yes or 'n' for no.")
+        continue
 
 # Console and log output each handled differently for this next
 # section. Log output is much more verbose. Console output has fancy
@@ -398,8 +412,11 @@ for dat_Filename, (dat_SystemName, dat_Fullpath) in list(dat_Dict.items()):
 
                     else:
                         #logging.debug(f"game_element = \n{etree.tostring(game_element, pretty_print=True).decode()}")
-                        game_element.set('name', f"[MIA] {game_element.attrib['name']}")
-                        game_element.find('description').text = f"[MIA] {game_element.find('description').text}"
+                        if add_mia_label is True:
+                            game_element.set('name', f"[MIA] {game_element.attrib['name']}")
+                            game_element.find('description').text = f"[MIA] {game_element.find('description').text}"
+                        elif add_mia_label is False:
+                            pass
                         for rom in game_element.findall('rom'):
                             if not rom.get('name').endswith(".cue"):
                                 rom.set('mia', 'yes')
