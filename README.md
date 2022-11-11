@@ -6,3 +6,5 @@ You can either simply open the program and manually input a specific .dat file, 
 It won't automatically replace the original inputted DATs with the new, updated ones, but you can select at the end if you would like it to do so.
 
 So far I've only tested this program on Windows 10 and with Python 3.11.0, so I can't make any guarantees for other set-ups, but let me know if you encounter any issues and I'll try to fix it.
+
+[Note: Requires external modules, "BeautifulSoup" and "lxml" to run properly.]
