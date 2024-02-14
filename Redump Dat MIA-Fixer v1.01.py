@@ -169,7 +169,7 @@ for tag in li_tags_list:
     mialist_Link = tag.a.get('href')
     mialist_Dict[mialist_SystemName] = (mialist_Category, mialist_Link)
 
-soup_section = soup.find(id='Systems_with_no_MIAs')
+soup_section = soup.find(id='Systems_with_no_reported_MIAs')
 li_tags_list = soup_section.parent.next_sibling.next_sibling.select('li')
 for tag in li_tags_list:
     mialist_SystemName = tag.get_text().rstrip()
@@ -201,18 +201,6 @@ logging.debug(f"---Total dictionary items: {len(mialist_Dict)}\n")
 ## May come back later and rework using class instances and True/False
 ## flags instead.)
 
-logging.info("\n'MIA' attributes will now be added for each game listed in the MIA lists. Would you like to also append an '[MIA]' label to the beginning of each game's archive/directory name? (will result in your rom manager going through and making actual changes to your folders/archives...)")
-while True:
-    mia_label_prompt = input("    y/n: ")
-    if mia_label_prompt == "y":
-        add_mia_label = True
-        break
-    elif mia_label_prompt == "n":
-        add_mia_label = False
-        break
-    else:
-        print("Please only enter 'y' for yes or 'n' for no.")
-        continue
 
 # Console and log output each handled differently for this next
 # section. Log output is much more verbose. Console output has fancy
@@ -240,6 +228,7 @@ dats_MadeItThrough = list()
 dats_outdated = list()
 mialists_outdated = list()
 dat_mialist_version_match = list()
+mialist_version_not_present = list()
 
 total_mia_discs_count = dict()
 unfound_mia_discs_count = dict()
@@ -332,8 +321,13 @@ for dat_Filename, (dat_SystemName, dat_Fullpath) in list(dat_Dict.items()):
 
             mialist_version_section = soup.find_all(
                 string=re.compile("dat version", re.IGNORECASE))
-            mialist_version = mialist_version_section[0].next_element.strip()
-            mialist_timestamp = mialist_version.split('(')[-1].rstrip(')')
+            if len(mialist_version_section) < 1:
+                mialist_version = None
+                mialist_timestamp = None
+                mialist_version_not_present.append(dat_Filename)
+            else:
+                mialist_version = mialist_version_section[0].next_element.strip()
+                mialist_timestamp = mialist_version.split('(')[-1].rstrip(')')
 
             mia_Discs_List = list()
 
@@ -412,11 +406,6 @@ for dat_Filename, (dat_SystemName, dat_Fullpath) in list(dat_Dict.items()):
 
                     else:
                         #logging.debug(f"game_element = \n{etree.tostring(game_element, pretty_print=True).decode()}")
-                        if add_mia_label is True:
-                            game_element.set('name', f"[MIA] {game_element.attrib['name']}")
-                            game_element.find('description').text = f"[MIA] {game_element.find('description').text}"
-                        elif add_mia_label is False:
-                            pass
                         for rom in game_element.findall('rom'):
                             if not rom.get('name').endswith(".cue"):
                                 rom.set('mia', 'yes')
@@ -500,7 +489,8 @@ logging.debug(f"""\n\n--Miscellaneous Statistics--
     DAT / MIA List Version Comparisons:
         Outdated DATs: {len(dats_outdated)}
         Outdated MIA lists: {len(mialists_outdated)}
-        DAT/MIA list version match: {len(dat_mialist_version_match)}
+        DAT/MIA list version matches: {len(dat_mialist_version_match)}
+        MIA lists without version indicated: {len(mialist_version_not_present)}
 
     Total MIA Discs checked: {sum(total_mia_discs_count.values())}
         MIA discs not found in DATs: {sum(unfound_mia_discs_count.values())}
